@@ -1,14 +1,10 @@
 // Enable chromereload by uncommenting this line:
 // import 'chromereload/devonly'
-import { Octokit } from "@octokit/rest"
-
-chrome.runtime.onInstalled.addListener((details) => {
-  console.log('previousVersion', details.previousVersion);
-});
+import client from "./client"
 
 setInterval(() => {
   fetchNotifications()
-}, 1000 * 10 * 1)
+}, 1000 * 60 * 10)
 fetchNotifications()
 
 function updateBadgeText(count: string) {
@@ -18,14 +14,13 @@ function updateBadgeText(count: string) {
 }
 
 async function fetchNotifications() {
-  const octokit = new Octokit({
-    baseUrl: 'https://ghe.ckpd.co/api/v3',
-    userAgent: 'GitHub Stream 2',
-    auth: 'b331f12a9bb24e7e731afd8db176a097524168d1'
-  })
-  let { data } = await octokit.request(`/notifications?t=${Number(new Date)}`);
+  let { data } = await client.request(`/notifications?t=${Number(new Date)}`);
 
-  console.log(data.length)
-  console.log(Number(new Date))
   updateBadgeText(data.length.toString())
+  localStorage.setItem('notifications', JSON.stringify(data))
 }
+
+// ToDo: Error handling
+// async function fetchThread() {
+//   let { data } = await client.request(`/notifications/threads/347673?t=${Number(new Date)}`);
+// }
